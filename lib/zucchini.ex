@@ -3,16 +3,7 @@ defmodule Zucchini do
   Documentation for `Zucchini`.
   """
 
-  @doc """
-  Hello world.
+  @type queue_name :: String.t | atom | {:global, String.t | atom}
+  @type task :: {atom, [arg :: term]}
 
-  ## Examples
-
-      iex> Zucchini.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end

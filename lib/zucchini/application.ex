@@ -3,13 +3,15 @@ defmodule Zucchini.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  alias Zucchini.{Queues, Registry}
   use Application
 
+  
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Zucchini.Worker.start_link(arg)
-      # {Zucchini.Worker, arg}
+      {Queues, []},
+      {Registry, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
