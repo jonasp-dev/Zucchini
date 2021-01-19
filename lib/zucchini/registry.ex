@@ -42,7 +42,6 @@ defmodule Zucchini.Registry do
         case Map.get(state, queue_name) do
             nil ->
                 Process.monitor(pid)
-                IO.inspect queue_name
                 {:reply, :yes, Map.put(state, queue_name, pid)}
             _ ->
                 {:reply, :no, state}
@@ -61,5 +60,15 @@ defmodule Zucchini.Registry do
     def remove_pid(state, pid_to_remove) do
         remove = fn {_key, pid} -> pid != pid_to_remove end
         Enum.filter(state, remove) |> Enum.into(%{})
+    end
+
+    def exists?(queue_name) do
+        whereis_name({:queue, queue_name})
+        |> case do
+            pid when is_pid(pid) ->
+                true
+            :undefined ->
+                false
+        end
     end
 end

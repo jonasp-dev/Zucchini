@@ -11,10 +11,9 @@ defmodule Zucchini.Queues do
         |> Enum.sort
     end
 
-    @spec start_queue(name, []) :: :ok | {:error, :not_running}
-    def start_queue(name, opts) do
-        IO.inspect Queue.child_spec(name)
-        with {:ok, child} <- Supervisor.start_child(__MODULE__, Queue.do_child_spec(name, [name: name])) do
+
+    def start_queue(opts) do
+        with {:ok, child} <- Supervisor.start_child(__MODULE__, Queue.do_child_spec(opts)) do
             {:ok, child}
         end
     end
