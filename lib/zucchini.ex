@@ -16,7 +16,7 @@ end
 # => "doing a thing!"
   """
 
-  alias Zucchini.{Job, Registry, Queue}
+  alias Zucchini.{Job, Registry, Queue, Queues}
 
   @type queue_name :: String.t | atom | {:global, String.t | atom}
   @type task :: {atom, [arg :: term]}
@@ -62,4 +62,6 @@ end
   def no_queue_error(%Job{queue: {:queue, _} = queue} = job) do
     "can't enqueue job because there aren't any queue processes running for the distributed queue `#{inspect queue}, are you connected to the cluster? #{inspect job} `"
   end
+
+  defdelegate start_queue(name), to: Queues
 end

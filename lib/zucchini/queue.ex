@@ -11,7 +11,7 @@ defmodule Zucchini.Queue do
         ] 
     end
 
-    def start_link(%{name: queue_name} = opts \\ %Message{}) do
+    def start_link(queue_name, opts \\ []) do
         GenServer.start_link(__MODULE__, opts, name: via_tuple(queue_name))
     end
 
@@ -42,22 +42,7 @@ defmodule Zucchini.Queue do
         {job, state} = do_enqueue(job, state)
         {:reply, {:ok, job}, state}
     end
-    # @impl true
-    # def handle_cast({:enqueue, job}, state) do
-    #     %State{queue: queue, message_count: message_count, message_form: message_form} = state
-    #     correct_keys = message_form |> Map.keys
-    #     job_keys = job |> Map.keys
-    #     case correct_keys == job_keys do
-    #         true ->
-    #             queue = :queue.in(job, queue)
-    #             message_count =  message_count + 1
-    #             state = %State{queue: queue, message_count: message_count, message_form: message_form}
-    #             {:noreply, state}
-    #         _ ->
-    #             IO.puts "Error"
-    #             {:noreply, state}
-    #     end
-    # end
+   
 
     @impl true
     def handle_call({:dequeue}, _from, state) do
@@ -84,12 +69,10 @@ defmodule Zucchini.Queue do
     end
 
     @spec do_child_spec(any()) :: Supervisor.child_spec()
-    def do_child_spec(%{name: queue_name} = opts) do
-        opts
+    def do_child_spec(name) do
+        name
         |> child_spec
-        |> Map.put(:id, queue_name)
+        |> Map.put(:id, name)
     end
 
 end
-
-#Zucchini.Queues.start_queue(%{name: "logs", message_form: %Zucchini.Message{name: "Jonas"}}) 
