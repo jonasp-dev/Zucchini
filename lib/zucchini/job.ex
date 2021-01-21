@@ -1,20 +1,25 @@
 defmodule Zucchini.Job do
     
+    # :task - task to be done
+    # :queue - queue job belongs to
+    # :enqueued_at - time job was enqueued at 
+    # :from - process that requested the job, incase a reply is needed
+    # :result - the result of running the task
+    # :job_monitor - monitor for the job incase it fails
+    # :start_at - the time the job began being ran
+    # :completed_at - the time the job finished
     defstruct [ :task, 
                 :queue,
                 :enqueued_at,
                 :from,
                 :result,
-                :by,
                 :job_monitor,
                 :started_at,
-                :completed_at,
-                {:delay_secs, 0}]
+                :completed_at]
 
     @type t :: %__MODULE__{
         task: Zucchini.task | nil,
-        queue: Zucchini.queue_name,
-        delay_secs: integer()
+        queue: Zucchini.queue_name
     }
 
     def new(task, queue) do

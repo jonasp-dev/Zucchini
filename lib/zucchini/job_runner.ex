@@ -10,7 +10,6 @@ defmodule Zucchini.JobRunner do
         GenServer.start_link(__MODULE__, opts)
     end
 
-    # def run_link(f, private_args) do
        
     # end
     @impl true
@@ -36,7 +35,7 @@ defmodule Zucchini.JobRunner do
 
 
     def handle_continue(:run, state) do
-        state = run_job(state)
+       #state = run_job(state)
         {:stop, :normal, state}
     end
 

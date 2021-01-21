@@ -31,12 +31,6 @@ end
       |> Enum.reduce(job, fn
         {:reply, true}, job ->
           %Job{job | from: {self(), make_ref()}} 
-        
-        {:delay_secs, secs}, job when is_integer(secs) and secs >= 0 ->
-          %Job{job | delay_secs: secs} 
-
-        {:delay_secs, something}, job ->
-          raise ArgumentError, invalid_delay_secs_error(job, something)
         end)
       |> enqueue
   end
