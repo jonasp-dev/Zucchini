@@ -12,6 +12,8 @@ defmodule Zucchini.Worker do
             :module,
             :init_args,
             :start_opts,
+            :job,
+            :job_runner,
             {:ready, false}
         ] 
     end
