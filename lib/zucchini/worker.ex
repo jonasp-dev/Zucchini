@@ -5,15 +5,15 @@ defmodule Zucchini.Worker do
 
     @callback init(args :: term) :: {:ok, state :: private}
 
+    # :queue - name of queue worker belongs to
+    # :queue_pid - pid of queue
+    # :module - module worker handles
+    # :{ready, false} - whether the worker is ready, i.e: not performing a job
     defmodule State do
         defstruct [
             :queue,
             :queue_pid,
             :module,
-            :init_args,
-            :start_opts,
-            :job,
-            :job_runner,
             {:ready, false}
         ] 
     end
