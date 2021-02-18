@@ -12,8 +12,8 @@ defmodule Zucchini.Queues do
     end
 
 
-    def start_queue(name) do
-        with {:ok, child} <- Supervisor.start_child(__MODULE__, Queue.do_child_spec(name)) do
+    def start_queue(args) do
+        with {:ok, child} <- Supervisor.start_child(__MODULE__, Queue.do_child_spec(args)) do
             {:ok, child}
         end
     end

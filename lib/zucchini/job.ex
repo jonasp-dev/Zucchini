@@ -10,9 +10,11 @@ defmodule Zucchini.Job do
     # :completed_at - the time the job finished
     defstruct [ :task, 
                 :queue,
+                :queue_pid,
                 :enqueued_at,
                 :from,
                 :result,
+                :worker,
                 :job_monitor,
                 :started_at,
                 :completed_at]
@@ -22,7 +24,7 @@ defmodule Zucchini.Job do
         queue: Zucchini.queue_name
     }
 
-    def new(task, queue) do
-        %__MODULE__{task: task, queue: queue, enqueued_at: System.system_time(:millisecond)}
+    def new(task, queue, queue_pid, from) do
+        %__MODULE__{task: task, queue: queue, queue_pid: queue_pid, enqueued_at: System.system_time(:millisecond), from: from}
     end
 end

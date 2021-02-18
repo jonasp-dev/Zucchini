@@ -1,34 +1,37 @@
 defmodule Zucchini.Queue do
     use GenServer
-    alias Zucchini.{Job, Message}
+    alias Zucchini.{Job, JobRunner, Message, Registry, Worker, Workers, WorkerCache}
 
     @type job :: Job.t
     @type name :: Zucchini.queue_name
 
     defmodule State do
         defstruct [:queue,
-            :module
+            :module,
+            :worker_cache
         ] 
     end
 
-    def start_link(queue_name, opts \\ []) do
+    def start_link(%{name: queue_name} = opts) do
         GenServer.start_link(__MODULE__, opts, name: via_tuple(queue_name))
     end
 
     @impl true
-    def init(arg) do
-        {:ok, %State{queue: :queue.new}}
+    def init(%{name: queue_name} = arg) do
+        {:ok, worker_cache_pid} = WorkerCache.start_link([])
+        Workers.start_workers(queue_name, worker_cache_pid, Zucchini.ExampleWorker, %{})
+        {:ok, %State{queue: :queue.new, worker_cache: worker_cache_pid}}
     end
 
     def enqueue(queue_name, job), do: GenServer.call(via_tuple(queue_name), {:enqueue, job})
     def dequeue(queue_name), do: GenServer.call(via_tuple(queue_name), {:dequeue})
     def status(queue_name), do: GenServer.call(via_tuple(queue_name), {:status})
 
-    defp do_enqueue(job, %State{queue: queue, module: module} = state) do
+    defp do_enqueue(job, worker, %State{queue: queue, module: module} = state) do
       job =
       job
       |> struct(enqueued_at: System.system_time(:millisecond))
-      
+      |> struct(worker: worker)
       state = %{state | queue: :queue.in(job, queue)}
       {job, state}
     end
@@ -38,8 +41,15 @@ defmodule Zucchini.Queue do
     end
 
     @impl true
-    def handle_call({:enqueue, job}, _from, state) do
-        {job, state} = do_enqueue(job, state)
+    def handle_call({:enqueue, job}, _from, %State{worker_cache: cache_pid}= state) do
+        #check if available worker
+        WorkerCache.available?(cache_pid)
+        #grab worker
+        {worker, _cache} = WorkerCache.checkout(cache_pid)
+        {job, state} = do_enqueue(job, worker, state)
+        #send job to worker
+        res = Worker.run(worker, job)
+  
         {:reply, {:ok, job}, state}
     end
    
@@ -47,7 +57,11 @@ defmodule Zucchini.Queue do
     @impl true
     def handle_call({:dequeue}, _from, state) do
         %State{queue: queue} = state
-        {job, queue} = :queue.out(queue)
+
+        # TODO: Check for empty queue
+        {{:value, j} = job, queue} = :queue.out(queue)
+        worker = JobRunner.start_link(j)
+        # Zucchini.Worker.start_link(j)
 
         state = %{state | queue: queue}
         {:reply, job, state}
@@ -69,10 +83,13 @@ defmodule Zucchini.Queue do
     end
 
     @spec do_child_spec(any()) :: Supervisor.child_spec()
-    def do_child_spec(name) do
-        name
+    def do_child_spec(%{name: name} = args) do
+       spec =
+        args
         |> child_spec
         |> Map.put(:id, name)
+
+        spec
     end
 
 end

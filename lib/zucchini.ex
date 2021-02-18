@@ -24,14 +24,16 @@ end
 
   @spec async(task, queue_name, [async_opt]) :: Job.t | no_return
   def async(task, queue, opts \\ []) do
-    job = Job.new(task, queue)
+    queue_pid = Zucchini.Registry.whereis_name({:queue, queue})
+    job = Job.new(task, queue, queue_pid, self())
 
-     job = 
-      opts
-      |> Enum.reduce(job, fn
-        {:reply, true}, job ->
-          %Job{job | from: {self(), make_ref()}} 
-        end)
+
+    #  job = 
+    #   opts
+    #   |> Enum.reduce(job, fn
+    #     {:reply, true}, job ->
+    #       %Job{job | from: {self(), make_ref()}} 
+    #     end)
       |> enqueue
   end
 
@@ -54,8 +56,8 @@ end
 
   @doc false
   def no_queue_error(%Job{queue: {:queue, _} = queue} = job) do
-    "can't enqueue job because there aren't any queue processes running for the distributed queue `#{inspect queue}, are you connected to the cluster? #{inspect job} `"
+    "`unable to to find queue: #{inspect queue}, cannot enqueue job #{inspect job}"
   end
 
-  defdelegate start_queue(name), to: Queues
+  defdelegate start_queue(args), to: Queues
 end

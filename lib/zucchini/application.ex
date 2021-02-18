@@ -3,7 +3,7 @@ defmodule Zucchini.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  alias Zucchini.{Queues, Registry}
+  alias Zucchini.{Queues, Registry, Workers}
   use Application
 
   
@@ -11,6 +11,7 @@ defmodule Zucchini.Application do
   def start(_type, _args) do
     children = [
       {Queues, []},
+      {Workers, []},
       {Registry, []}
     ]
 
