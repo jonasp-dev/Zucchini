@@ -13,12 +13,13 @@ defmodule Zucchini.Queue do
     end
 
     def start_link(%{name: queue_name} = opts) do
+        IO.inspect queue_name
         GenServer.start_link(__MODULE__, opts, name: via_tuple(queue_name))
     end
 
     @impl true
     def init(%{name: queue_name} = arg) do
-        {:ok, worker_cache_pid} = WorkerCache.start_link([])
+        {:ok, worker_cache_pid} = WorkerCache.start_link(%{name: queue_name})
         Workers.start_workers(queue_name, worker_cache_pid, Zucchini.ExampleWorker, %{})
         {:ok, %State{queue: :queue.new, worker_cache: worker_cache_pid}}
     end
