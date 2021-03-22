@@ -28,6 +28,7 @@ defmodule Zucchini.Workers do
             num: worker_opts[:num] || 10,
             worker_cache: worker_cache
         }
+
         child_spec = 
             WorkerSupervisor.child_spec(opts)
             |> Map.put(:id, name)

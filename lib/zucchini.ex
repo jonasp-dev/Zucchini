@@ -1,21 +1,4 @@
 defmodule Zucchini do
-  @moduledoc """
-  Documentation for `Zucchini`.
-
-  defmodule MyWorker do
-  def do_a_thing do
-    IO.puts "doing a thing!"
-  end
-end
-
-:ok = Zucchini.start_queue(:my_queue)
-:ok = Zucchini.start_workers(:my_queue, MyWorker)
-
-:do_a_thing |> Zucchini.async(:my_queue)
-
-# => "doing a thing!"
-  """
-
   alias Zucchini.{Job, Registry, Queue, Queues}
 
   @type queue_name :: String.t | atom | {:global, String.t | atom}
@@ -49,10 +32,7 @@ end
     |> Queue.enqueue(job)
   end
 
-  @doc false
-  def invalid_delay_secs_error(job, secs) do
-    "invalid :delay_secs argument, #{inspect secs}, provided for job #{inspect job}, must be a non-negative integer"
-  end
+
 
   @doc false
   def no_queue_error(%Job{queue: {:queue, _} = queue} = job) do

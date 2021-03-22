@@ -13,7 +13,6 @@ defmodule Zucchini.Queue do
     end
 
     def start_link(%{name: queue_name} = opts) do
-        IO.inspect queue_name
         GenServer.start_link(__MODULE__, opts, name: via_tuple(queue_name))
     end
 

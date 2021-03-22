@@ -6,11 +6,9 @@ defmodule Zucchini.WorkerSupervisor do
     
     def start_link(%{name: name, num: num, worker_cache: worker_cache} = init_arg) do
         {:ok, supervisor} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: name)
-
         Enum.each(1..num, fn _ ->
-
-           {:ok, pid} = start_worker([supervisor] ++ [init_arg])
-            WorkerCache.checkin(worker_cache, pid)
+          {:ok, pid} = start_worker([supervisor] ++ [init_arg])
+          WorkerCache.checkin(worker_cache, pid)
         end
         )
         {:ok, supervisor}

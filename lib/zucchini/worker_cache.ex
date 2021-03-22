@@ -6,7 +6,6 @@ defmodule Zucchini.WorkerCache do
     # end
 
     def start_link(%{name: cache_name} = opts \\ %{}) do
-        IO.inspect opts
         Agent.start_link(fn -> {:queue.new, MapSet.new} end, name: via_tuple(cache_name))
     end
 

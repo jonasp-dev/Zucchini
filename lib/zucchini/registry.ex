@@ -49,7 +49,6 @@ defmodule Zucchini.Registry do
     end
 
     def handle_info({:DOWN, _, :process, pid, _}, state) do
-        IO.inspect pid
         {:noreply, remove_pid(state, pid)}
     end
 
