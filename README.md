@@ -1,6 +1,6 @@
 # **Zucchini Job Queue**
 A job queue/worker pool written in Elixir 
-
+    ```elixir
 	#Start a queue and run a task
     defmodule ExampleWorker do
 	    def add_two_numbers(a,b) do
@@ -9,3 +9,4 @@ A job queue/worker pool written in Elixir
     end
     Zucchini.start_queue(%{name: queue_name})
     Zucchini.async(&ExampleWorker.add_two_numers/2, queue_name)
+    ```
