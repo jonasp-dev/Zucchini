@@ -9,15 +9,7 @@ defmodule Zucchini do
   def async(task, queue, opts \\ []) do
     queue_pid = Zucchini.Registry.whereis_name({:queue, queue})
     job = Job.new(task, queue, queue_pid, self())
-
-
-    #  job = 
-    #   opts
-    #   |> Enum.reduce(job, fn
-    #     {:reply, true}, job ->
-    #       %Job{job | from: {self(), make_ref()}} 
-    #     end)
-      |> enqueue
+    |> enqueue
   end
 
 

@@ -8,4 +8,9 @@ defmodule Zucchini.ExampleWorker do
         res = Enum.reverse(list)
         {:ok, res}
     end
+
+    def sleep_task(milliseconds) do
+         Process.sleep(30000)
+         IO.puts("finished sleeping...")
+    end
 end

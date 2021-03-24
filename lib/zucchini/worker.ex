@@ -3,6 +3,7 @@ defmodule Zucchini.Worker do
 
     alias Zucchini.Job
     alias Zucchini.JobRunner
+    alias Zucchini.WorkerCache
     @type private :: term
     
     @callback init(args :: term) :: {:ok, state :: private}
@@ -15,6 +16,7 @@ defmodule Zucchini.Worker do
         defstruct [
             :queue,
             :queue_pid,
+            :worker_cache,
             {:ready, false}
         ] 
     end
@@ -34,10 +36,12 @@ defmodule Zucchini.Worker do
     def job_complete(worker, job), do: GenServer.cast(worker, {:job_complete, job})
 
     @impl true
-    def init([supervisor | opts] = start_args) do
+    def init([supervisor |  opts] = start_args) do
         #Add worker to registry group
+        [%{worker_cache: worker_cache} = head | _rest] = opts
         {:ok, %State{
-            ready: true
+            ready: true,
+            worker_cache: worker_cache
         }}
     end
 
@@ -45,10 +49,10 @@ defmodule Zucchini.Worker do
     def handle_call({:run, job}, _from, state) do
         {:reply, do_run(job, state), state}
     end
-
    
-    def handle_cast({:job_complete, %Job{from: from}= job}, state) do
+    def handle_cast({:job_complete, %Job{from: from, worker: worker}= job}, %{worker_cache: worker_cache} = state) do
         send(from, job)
+        WorkerCache.checkin(worker_cache, worker)
         {:noreply, state}
     end
 

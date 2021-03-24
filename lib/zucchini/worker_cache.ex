@@ -1,10 +1,6 @@
 defmodule Zucchini.WorkerCache do
     use Agent
 
-    # def start_link(opts) do
-    #     GenServer.start_link(__MODULE__, opts)
-    # end
-
     def start_link(%{name: cache_name} = opts \\ %{}) do
         Agent.start_link(fn -> {:queue.new, MapSet.new} end, name: via_tuple(cache_name))
     end

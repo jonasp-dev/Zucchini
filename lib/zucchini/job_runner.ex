@@ -26,7 +26,7 @@ defmodule Zucchini.JobRunner do
         #run job
         result = 
             case task do
-                f when is_function(f) -> apply(f, [3,10])
+                f when is_function(f) -> apply(f, [5000])
             end    
         job = %{job | result: result}
         
