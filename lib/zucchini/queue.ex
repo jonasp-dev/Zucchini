@@ -27,11 +27,10 @@ defmodule Zucchini.Queue do
     def dequeue(queue_name), do: GenServer.call(via_tuple(queue_name), {:dequeue})
     def status(queue_name), do: GenServer.call(via_tuple(queue_name), {:status})
 
-    defp do_enqueue(job, worker, %State{queue: queue, module: module} = state) do
+    defp do_enqueue(job, %State{queue: queue, module: module} = state) do
       job =
       job
       |> struct(enqueued_at: System.system_time(:millisecond))
-      |> struct(worker: worker)
       state = %{state | queue: :queue.in(job, queue)}
       {job, state}
     end
@@ -43,12 +42,20 @@ defmodule Zucchini.Queue do
     @impl true
     def handle_call({:enqueue, job}, _from, %State{worker_cache: cache_pid}= state) do
         #check if available worker
-        WorkerCache.available?(cache_pid)
-        #grab worker
-        {worker, _cache} = WorkerCache.checkout(cache_pid)
-        {job, state} = do_enqueue(job, worker, state)
-        #send job to worker
-        res = Worker.run(worker, job)
+        worker_available = WorkerCache.available?(cache_pid)
+
+       {job, state} =
+            case worker_available do
+                true ->
+                    {worker, _cache} = WorkerCache.checkout(cache_pid)
+                    job =
+                    job
+                    |> struct(worker: worker)
+                    res = Worker.run(worker, job)
+                    {job, state}
+                _ ->
+                    {job, state} = do_enqueue(job, state)
+            end
   
         {:reply, {:ok, job}, state}
     end
