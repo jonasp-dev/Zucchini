@@ -7,6 +7,7 @@ defmodule Zucchini.Queue do
 
     defmodule State do
         defstruct [:queue,
+            :queue_name,
             :module,
             :worker_cache
         ] 
@@ -20,11 +21,12 @@ defmodule Zucchini.Queue do
     def init(%{name: queue_name} = arg) do
         {:ok, worker_cache_pid} = WorkerCache.start_link(%{name: queue_name})
         Workers.start_workers(queue_name, worker_cache_pid, Zucchini.ExampleWorker, %{})
-        {:ok, %State{queue: :queue.new, worker_cache: worker_cache_pid}}
+        {:ok, %State{queue: :queue.new, queue_name: queue_name, worker_cache: worker_cache_pid}}
     end
 
     def enqueue(queue_name, job), do: GenServer.call(via_tuple(queue_name), {:enqueue, job})
-    def dequeue(queue_name), do: GenServer.call(via_tuple(queue_name), {:dequeue})
+    def dequeue(queue_name), do: GenServer.cast(via_tuple(queue_name), {:dequeue})
+    def worker_finished(queue_name), do: GenServer.cast(via_tuple(queue_name), :worker_finished)
     def status(queue_name), do: GenServer.call(via_tuple(queue_name), {:status})
 
     defp do_enqueue(job, %State{queue: queue, module: module} = state) do
@@ -62,21 +64,33 @@ defmodule Zucchini.Queue do
    
 
     @impl true
-    def handle_call({:dequeue}, _from, state) do
+    def handle_cast({:dequeue}, %State{worker_cache: cache_pid} = state) do
         %State{queue: queue} = state
+        state = case :queue.is_empty(queue) do
+            true ->
+                state
+            false ->
+                {{:value, job}, queue} = :queue.out(queue)
+                {worker, _cache} = WorkerCache.checkout(cache_pid)
+                    job =
+                    job
+                    |> struct(worker: worker)
+                    res = Worker.run(worker, job)
+                    %{state | queue: queue}
+        end
 
-        # TODO: Check for empty queue
-        {{:value, j} = job, queue} = :queue.out(queue)
-        worker = JobRunner.start_link(j)
-        # Zucchini.Worker.start_link(j)
-
-        state = %{state | queue: queue}
-        {:reply, job, state}
+        {:noreply, state}
     end
 
     @impl true
     def handle_call({:status}, _from, state) do
         {:reply, state, state}
+    end
+
+    @impl true
+    def handle_cast(:worker_finished, %State{queue: queue, queue_name: queue_name} = state) do
+        dequeue(queue_name)
+        {:noreply, state}
     end
     @impl true
     def handle_info({:SHUTDOWN, from, reason}, state) do
