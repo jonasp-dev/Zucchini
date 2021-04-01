@@ -6,7 +6,7 @@ defmodule Zucchini.Workers do
     def start_link(args) do
         Supervisor.start_link(__MODULE__, args, name: __MODULE__)
     end
-    
+
     @impl true
     def init(_args) do
         Supervisor.init([], strategy: :one_for_one)
@@ -19,7 +19,7 @@ defmodule Zucchini.Workers do
                 module when is_atom(module) -> {module, []}
                 {module, args} -> {module, args}
             end
-        
+
 
 
         opts = %{
@@ -29,7 +29,7 @@ defmodule Zucchini.Workers do
             worker_cache: worker_cache
         }
 
-        child_spec = 
+        child_spec =
             WorkerSupervisor.child_spec(opts)
             |> Map.put(:id, name)
 
@@ -37,7 +37,7 @@ defmodule Zucchini.Workers do
             {:ok, child}
         end
 
-    
+
     end
-    
+
 end

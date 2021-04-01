@@ -10,7 +10,7 @@ defmodule Zucchini.Queue do
             :queue_name,
             :module,
             :worker_cache
-        ] 
+        ]
     end
 
     def start_link(%{name: queue_name} = opts) do
@@ -20,7 +20,7 @@ defmodule Zucchini.Queue do
     @impl true
     def init(%{name: queue_name} = arg) do
         {:ok, worker_cache_pid} = WorkerCache.start_link(%{name: queue_name})
-        Workers.start_workers(queue_name, worker_cache_pid, Zucchini.ExampleWorker, %{})
+        Workers.start_workers(queue_name, worker_cache_pid, Zucchini.ExampleWorker, arg)
         {:ok, %State{queue: :queue.new, queue_name: queue_name, worker_cache: worker_cache_pid}}
     end
 
@@ -36,7 +36,7 @@ defmodule Zucchini.Queue do
       state = %{state | queue: :queue.in(job, queue)}
       {job, state}
     end
-    
+
     defp via_tuple(queue_name) do
         {:via, Zucchini.Registry, {:queue, queue_name}}
     end
@@ -58,10 +58,10 @@ defmodule Zucchini.Queue do
                 _ ->
                     {job, state} = do_enqueue(job, state)
             end
-  
+
         {:reply, {:ok, job}, state}
     end
-   
+
 
     @impl true
     def handle_cast({:dequeue}, %State{worker_cache: cache_pid} = state) do
