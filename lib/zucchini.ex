@@ -4,7 +4,7 @@ defmodule Zucchini do
   require Logger
 
   @type queue_name :: atom()
-  @type task :: {atom, [arg :: term]}
+  @type job :: %Job{}
   @type async_opt :: {:reply, true} | {:delay_secs, pos_integer()}
   @type queue_opts :: map()
   @doc """
@@ -25,13 +25,17 @@ defmodule Zucchini do
       end
   end
 
-  @spec async(task, queue_name, [async_opt]) :: Job.t | no_return
-  def async(task, queue, opts \\ []) do
+  @spec async(job(), queue_name, [async_opt]) :: Job.t | no_return
+  def async(job, queue, opts \\ []) do
     queue_pid = Zucchini.Registry.whereis_name({:queue, queue})
-    job = Job.new(task, queue, queue_pid, self())
+    Job.new(job, opts, queue, queue_pid, self())
     |> enqueue
   end
 
+
+  def create_job(module, function, args) do
+    Job.new(module, function, args)
+  end
 
 
   def enqueue(%Job{queue: queue} = job) do

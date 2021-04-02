@@ -20,7 +20,7 @@ defmodule Zucchini.Queue do
     @impl true
     def init(%{name: queue_name} = arg) do
         {:ok, worker_cache_pid} = WorkerCache.start_link(%{name: queue_name})
-        Workers.start_workers(queue_name, worker_cache_pid, Zucchini.ExampleWorker, arg)
+        Workers.start_workers(queue_name, worker_cache_pid, arg)
         {:ok, %State{queue: :queue.new, queue_name: queue_name, worker_cache: worker_cache_pid}}
     end
 
@@ -29,7 +29,7 @@ defmodule Zucchini.Queue do
     def worker_finished(queue_name), do: GenServer.cast(via_tuple(queue_name), :worker_finished)
     def status(queue_name), do: GenServer.call(via_tuple(queue_name), {:status})
 
-    defp do_enqueue(job, %State{queue: queue, module: module} = state) do
+    defp do_enqueue(job, %State{queue: queue} = state) do
       job =
       job
       |> struct(enqueued_at: System.system_time(:millisecond))
@@ -53,10 +53,10 @@ defmodule Zucchini.Queue do
                     job =
                     job
                     |> struct(worker: worker)
-                    res = Worker.run(worker, job)
+                    Worker.run(worker, job)
                     {job, state}
                 _ ->
-                    {job, state} = do_enqueue(job, state)
+                    do_enqueue(job, state)
             end
 
         {:reply, {:ok, job}, state}
@@ -75,7 +75,7 @@ defmodule Zucchini.Queue do
                     job =
                     job
                     |> struct(worker: worker)
-                    res = Worker.run(worker, job)
+                    Worker.run(worker, job)
                     %{state | queue: queue}
         end
 
@@ -88,7 +88,7 @@ defmodule Zucchini.Queue do
     end
 
     @impl true
-    def handle_cast(:worker_finished, %State{queue: queue, queue_name: queue_name} = state) do
+    def handle_cast(:worker_finished, %State{queue: _queue, queue_name: queue_name} = state) do
         dequeue(queue_name)
         {:noreply, state}
     end

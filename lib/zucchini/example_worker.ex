@@ -1,5 +1,5 @@
 defmodule Zucchini.ExampleWorker do
-    
+
     def add(a, b) do
         {:ok, a+b}
     end
@@ -10,7 +10,7 @@ defmodule Zucchini.ExampleWorker do
     end
 
     def sleep_task(milliseconds) do
-         Process.sleep(30000)
+         Process.sleep(milliseconds)
          IO.puts("finished sleeping...")
     end
 end

@@ -1,5 +1,4 @@
 defmodule Zucchini.WorkerSupervisor do
-
     alias Zucchini.Worker
     alias Zucchini.WorkerCache
     require Logger

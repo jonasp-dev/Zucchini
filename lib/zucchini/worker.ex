@@ -5,7 +5,7 @@ defmodule Zucchini.Worker do
     alias Zucchini.JobRunner
     alias Zucchini.WorkerCache
     @type private :: term
-    
+
     @callback init(args :: term) :: {:ok, state :: private}
 
     # :queue - name of queue worker belongs to
@@ -18,7 +18,7 @@ defmodule Zucchini.Worker do
             :queue_pid,
             :worker_cache,
             {:ready, false}
-        ] 
+        ]
     end
     def start_link(opts) do
         worker = GenServer.start_link(__MODULE__, opts)
@@ -49,7 +49,8 @@ defmodule Zucchini.Worker do
     def handle_call({:run, job}, _from, state) do
         {:reply, do_run(job, state), state}
     end
-   
+
+    @impl true
     def handle_cast({:job_complete, %Job{from: from, worker: worker}= job}, %{worker_cache: worker_cache} = state) do
         send(from, job)
         WorkerCache.checkin(worker_cache, worker)

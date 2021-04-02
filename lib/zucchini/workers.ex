@@ -13,18 +13,9 @@ defmodule Zucchini.Workers do
     end
 
 
-    def start_workers(name, worker_cache, module_and_args, worker_opts) do
-        {module, args} =
-            case module_and_args do
-                module when is_atom(module) -> {module, []}
-                {module, args} -> {module, args}
-            end
-
-
-
+    def start_workers(name, worker_cache, worker_opts) do
         opts = %{
             name: name,
-            ma: {module, args},
             num: worker_opts[:num] || 10,
             worker_cache: worker_cache
         }
