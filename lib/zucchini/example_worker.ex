@@ -4,6 +4,10 @@ defmodule Zucchini.ExampleWorker do
         {:ok, a+b}
     end
 
+    def add(a, b, c) do
+        {:ok, a+b+c}
+    end
+
     def reverse(list) do
         res = Enum.reverse(list)
         {:ok, res}

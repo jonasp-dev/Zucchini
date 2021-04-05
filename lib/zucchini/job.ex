@@ -1,5 +1,5 @@
 defmodule Zucchini.Job do
-
+    require Logger
     # :task - task to be done
     # :queue - queue job belongs to
     # :enqueued_at - time job was enqueued at
@@ -28,7 +28,38 @@ defmodule Zucchini.Job do
         %__MODULE__{task: {module, function, args}}
     end
 
-    def verify_task() do
+    @doc """
+    Creates a Job struct containing the appropriate task keyword for the passed in module, function, args
+
+    create_job/2 takes in a function and args,
+
+    ## Parameters
+
+  """
+
+    def create_job(function, args) when is_list(args) do
+        [module: module, name: name, arity: _arity, env: _, type: _] = Function.info function
+        create_job(module, name, args)
+    end
+
+    def create_job(module, function, args) when is_list(args) do
+        case verify_task(module, function, length(args)) do
+            true ->
+                __MODULE__.new(module, function, args)
+            false ->
+                Logger.error("Failed to create job: #{inspect module} #{inspect function} with arity #{inspect length(args)} either does not exist or is not public")
+        end
+    end
+
+    def verify_task(module, function, arity) do
+       Keyword.get_values(module.__info__(:functions), function)
+       |> Enum.member?(arity)
+       |> case do
+        true ->
+            true
+        false ->
+            false
+       end
 
     end
 end

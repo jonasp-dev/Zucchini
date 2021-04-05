@@ -45,11 +45,11 @@ defmodule Zucchini.JobRunner do
     end
 
     @impl true
-  def terminate(:normal, _state), do: :ok
-  def terminate(:shutdown, _state), do: :ok
-  def terminate({:shutdown, _}, _state), do: :ok
-  def terminate(reason, _state) do
-    Logger.info("[Zucchini] JobRunner #{inspect self()} stopped because #{inspect reason}")
-  end
+    def terminate(:normal, _state), do: :ok
+    def terminate(:shutdown, _state), do: :ok
+    def terminate({:shutdown, _}, _state), do: :ok
+    def terminate(reason, _state) do
+        Logger.info("[Zucchini] JobRunner #{inspect self()} stopped because #{inspect reason}")
+    end
 
 end
