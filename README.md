@@ -8,6 +8,8 @@ defmodule ExampleWorker do
         a+b
     end
 end
-Zucchini.start_queue(%{name: queue_name})
-Zucchini.async(&ExampleWorker.add_two_numers/2, queue_name)
+
+Zucchini.start(:queue_name)
+Zucchini.create_job(ExampleWorker, :add_two_numbers, [2, 3])
+|> Zucchini.async(:queue_name)
 ```

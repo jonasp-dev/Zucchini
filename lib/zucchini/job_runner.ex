@@ -2,6 +2,7 @@ defmodule Zucchini.JobRunner do
     use GenServer
 
     alias Zucchini.{Job, Worker}
+    require Logger
 
     defmodule State do
         defstruct [:worker, :job, :module]
@@ -12,7 +13,7 @@ defmodule Zucchini.JobRunner do
         GenServer.start_link(__MODULE__, opts)
     end
 
-       
+
     # end
     @impl true
     def init(%Job{} = opts) do
@@ -21,15 +22,14 @@ defmodule Zucchini.JobRunner do
         }, {:continue, :run}}
     end
 
-    defp run_job(%State{job: %Job{task: task, worker: worker_pid} = job,
-                module: module} = state) do
+    defp run_job(%State{job: %Job{task: task, worker: worker_pid} = job} = state) do
         #run job
-        result = 
+        result =
             case task do
-                f when is_function(f) -> apply(f, [5000])
-            end    
+                {module, f, args} -> apply(module, f, args)
+            end
         job = %{job | result: result}
-        
+
         Task.async( fn ->  Worker.job_complete(worker_pid, job) end)
 
         job
@@ -37,18 +37,19 @@ defmodule Zucchini.JobRunner do
     end
 
 
+    @impl true
     def handle_continue(:run, state) do
        state = run_job(state)
-        
+
         {:stop, :normal, state}
     end
 
     @impl true
-  def terminate(:normal, _state), do: :ok
-  def terminate(:shutdown, _state), do: :ok
-  def terminate({:shutdown, _}, _state), do: :ok
-  def terminate(reason, _state) do
-    IO.puts "[Zucchini] JobRunner #{inspect self()} stopped because #{inspect reason}"
-  end
+    def terminate(:normal, _state), do: :ok
+    def terminate(:shutdown, _state), do: :ok
+    def terminate({:shutdown, _}, _state), do: :ok
+    def terminate(reason, _state) do
+        Logger.info("[Zucchini] JobRunner #{inspect self()} stopped because #{inspect reason}")
+    end
 
 end

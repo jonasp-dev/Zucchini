@@ -13,15 +13,18 @@ defmodule Zucchini.Queues do
 
 
     def start_queue(args) do
-        with {:ok, child} <- Supervisor.start_child(__MODULE__, Queue.do_child_spec(args)) do
-            {:ok, child}
-        end
+        with {:ok, child} <- Supervisor.start_child(__MODULE__, Queue.do_child_spec(args))
+            do
+                {:ok, child}
+            else
+                {:error, reason} -> {:error, "Failed to start Queue for reason: #{inspect reason}"}
+            end
     end
 
     def start_link(args) do
         Supervisor.start_link(__MODULE__, args, name: __MODULE__)
     end
-    
+
     @impl true
     def init(_args) do
         Supervisor.init([], strategy: :one_for_one)
