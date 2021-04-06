@@ -20,11 +20,11 @@ defmodule Zucchini.Job do
                 :completed_at]
 
 
-    def new(job = %__MODULE__{}, opts, queue, queue_pid, from) do
+    def new(job = %__MODULE__{}, _opts, queue, queue_pid, from) do
         %__MODULE__{ job | queue: queue, queue_pid: queue_pid, enqueued_at: System.system_time(:millisecond), from: from}
     end
 
-    def new(module, function, args) do
+    defp new(module, function, args) do
         %__MODULE__{task: {module, function, args}}
     end
 
@@ -45,9 +45,10 @@ defmodule Zucchini.Job do
     def create_job(module, function, args) when is_list(args) do
         case verify_task(module, function, length(args)) do
             true ->
-                __MODULE__.new(module, function, args)
+                new(module, function, args)
             false ->
                 Logger.error("Failed to create job: #{inspect module} #{inspect function} with arity #{inspect length(args)} either does not exist or is not public")
+                :error
         end
     end
 

@@ -13,7 +13,6 @@ defmodule Zucchini do
   Starts a queue with the given name and opts.
 
   ## Parameters
-
       - queue_name: an atom representing the name of the queue to be created
       - opts: a map containing key-value pairs related to the queue and workers started
 
@@ -56,6 +55,7 @@ defmodule Zucchini do
     |> Registry.exists?
     |> case do
       true -> queue
+      # change to logger
       false -> raise RuntimeError, no_queue_error(job)
     end
     |> Queue.enqueue(job)
