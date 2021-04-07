@@ -18,14 +18,17 @@ defmodule ZucchiniTest do
       assert :error == Zucchini.start(:testQueue)
     end
 
-    test "start/2 starts the correct number of workers" do
-      # UNIMPLEMENTED
-      assert :ok == :ok
+     # test "start/2 starts the correct number of workers" do
+    #   # UNIMPLEMENTED
+    #   assert :ok == :ok
+    # end
+
+    test "async/2 returns {:ok, %Job{}} on success", %{job: job} do
+      assert {:ok, %Zucchini.Job{}} = Zucchini.async(job, :testQueue)
     end
 
-    test "async/2 returns " do
-      # UNIMPLEMENTED
-      assert :ok == :ok
+    test "stop/1 sucessfully terminates workers associated with queue" do
+
     end
   end
 
