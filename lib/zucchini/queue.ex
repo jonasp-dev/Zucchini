@@ -1,7 +1,7 @@
 defmodule Zucchini.Queue do
     use GenServer
     alias Zucchini.{Job, JobRunner, Message, Registry, Worker, Workers, WorkerCache}
-
+    require Logger
     @type job :: Job.t
     @type name :: Zucchini.queue_name
 
@@ -19,6 +19,7 @@ defmodule Zucchini.Queue do
 
     @impl true
     def init(%{name: queue_name} = arg) do
+        Process.flag(:trap_exit, true)
         {:ok, worker_cache_pid} = WorkerCache.start_link(%{name: queue_name})
         Workers.start_workers(queue_name, worker_cache_pid, arg)
         {:ok, %State{queue: :queue.new, queue_name: queue_name, worker_cache: worker_cache_pid}}
@@ -92,15 +93,22 @@ defmodule Zucchini.Queue do
         dequeue(queue_name)
         {:noreply, state}
     end
+
     @impl true
-    def handle_info({:SHUTDOWN, from, reason}, state) do
-        IO.puts "Exit pid: #{inspect from} reason: #{inspect reason}"
+    def handle_info({:shutdown, state}, state) do
+        Logger.error("Exit pid")
         {:noreply, state}
         end
+
     @impl true
-    def handle_info({:EXIT, from, reason}, state) do
-        IO.puts "Exit pid: #{inspect from} reason: #{inspect reason}"
+    def handle_info({:exit, from, reason}, state) do
+        Logger.error("Exit pid: #{inspect from} reason: #{inspect reason}")
         {:noreply, state}
+    end
+
+    def terminate(_reason, %State{queue_name: name} = state) do
+        Workers.stop_workers(name)
+        :ok
     end
 
     @spec do_child_spec(any()) :: Supervisor.child_spec()

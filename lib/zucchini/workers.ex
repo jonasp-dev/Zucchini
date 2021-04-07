@@ -31,4 +31,10 @@ defmodule Zucchini.Workers do
 
     end
 
+    def stop_workers(name) do
+        with :ok <- Supervisor.terminate_child(__MODULE__, name) do
+            Supervisor.delete_child(__MODULE__, name)
+        end
+    end
+
 end

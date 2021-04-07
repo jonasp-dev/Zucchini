@@ -48,6 +48,7 @@ defmodule Zucchini do
     queue_pid = Zucchini.Registry.whereis_name({:queue, queue})
     Job.new(job, opts, queue, queue_pid, self())
     |> enqueue
+
   end
 
   defp enqueue(%Job{queue: queue} = job) do
@@ -70,5 +71,5 @@ defmodule Zucchini do
 
   defdelegate create_job(function, args), to: Job
   defdelegate create_job(module, function, args), to: Job
-
+  defdelegate stop(pid), to: Queues, as: :stop_queue
 end
