@@ -5,7 +5,7 @@ defmodule Zucchini do
 
   @type queue_name :: atom()
   @type job :: %Job{}
-  @type async_opt :: {:reply, true} | {:delay_secs, pos_integer()}
+  @type async_opt :: {:reply, true}
   @type queue_opts :: map()
 
 
@@ -46,7 +46,13 @@ defmodule Zucchini do
   @spec async(job(), queue_name, [async_opt]) :: Job.t | no_return
   def async(job, queue, opts \\ []) do
     queue_pid = Zucchini.Registry.whereis_name({:queue, queue})
-    Job.new(job, opts, queue, queue_pid, self())
+    job = Job.new(job, opts, queue, queue_pid)
+
+    opts
+    |> Enum.reduce(job, fn
+      {:reply, true}, job ->
+        %Job{job | from: self()} end)
+      #other opts
     |> enqueue
 
   end

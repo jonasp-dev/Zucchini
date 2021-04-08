@@ -52,7 +52,13 @@ defmodule Zucchini.Worker do
 
     @impl true
     def handle_cast({:job_complete, %Job{from: from, worker: worker}= job}, %{worker_cache: worker_cache} = state) do
-        send(from, job)
+        case is_pid(from) do
+            true ->
+                send(from, job)
+            false ->
+                :ok
+        end
+
         WorkerCache.checkin(worker_cache, worker)
         {:noreply, state}
     end

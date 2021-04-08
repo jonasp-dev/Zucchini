@@ -20,8 +20,8 @@ defmodule Zucchini.Job do
                 :completed_at]
 
 
-    def new(job = %__MODULE__{}, _opts, queue, queue_pid, from) do
-        %__MODULE__{ job | queue: queue, queue_pid: queue_pid, enqueued_at: System.system_time(:millisecond), from: from}
+    def new(job = %__MODULE__{}, opts, queue, queue_pid) do
+        %__MODULE__{ job | queue: queue, queue_pid: queue_pid, enqueued_at: System.system_time(:millisecond)}
     end
 
     defp new(module, function, args) do
