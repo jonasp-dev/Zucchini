@@ -8,7 +8,8 @@ defmodule Zucchini.Job do
     # :job_monitor - monitor for the job incase it fails
     # :start_at - the time the job began being ran
     # :completed_at - the time the job finished
-    defstruct [ :task,
+    defstruct [ :id,
+                :task,
                 :queue,
                 :queue_pid,
                 :enqueued_at,
@@ -21,7 +22,7 @@ defmodule Zucchini.Job do
 
 
     def new(job = %__MODULE__{}, opts, queue, queue_pid) do
-        %__MODULE__{ job | queue: queue, queue_pid: queue_pid, enqueued_at: System.system_time(:millisecond)}
+        %__MODULE__{ job | id: random_job_id(), queue: queue, queue_pid: queue_pid, enqueued_at: System.system_time(:millisecond)}
     end
 
     defp new(module, function, args) do
@@ -62,5 +63,9 @@ defmodule Zucchini.Job do
             false
        end
 
+    end
+
+    defp random_job_id() do
+        :crypto.strong_rand_bytes(5) |> Base.url_encode64(padding: false)
     end
 end
