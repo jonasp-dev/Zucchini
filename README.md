@@ -24,7 +24,7 @@ defmodule Zucchini.ExampleWorker do
     end
 end
 
-Start queue -> create a job -> push job onto queue
+# Start queue -> create a job -> push job onto queue
 Zucchini.start(:queue_name)
 Zucchini.create_job(Zucchini.ExampleWorker, :add, [2, 3])
 |> Zucchini.async(:queue_name, [{:reply, true}])
