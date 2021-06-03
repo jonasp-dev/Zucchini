@@ -31,6 +31,6 @@ iex> Zucchini.create_job(Zucchini.ExampleWorker, :add, [2, 3]) |> Zucchini.async
 ## Reply is in caller's message queue 
 iex> Process.info(self(), :messages)
 
-#using erlang observer we can take a look at our supervision tree
+# Using erlang observer we can take a look at our supervision tree
 iex> :observer.start
 ```
