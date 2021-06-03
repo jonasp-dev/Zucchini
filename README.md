@@ -25,9 +25,8 @@ defmodule Zucchini.ExampleWorker do
 end
 
 # Start queue -> create a job -> push job onto queue
-Zucchini.start(:queue_name)
-Zucchini.create_job(Zucchini.ExampleWorker, :add, [2, 3])
-|> Zucchini.async(:queue_name, [{:reply, true}])
+iex> Zucchini.start(:queue_name)
+iex> Zucchini.create_job(Zucchini.ExampleWorker, :add, [2, 3]) |> Zucchini.async(:queue_name, [{:reply, true}])
 
 ## Reply is in caller's message queue 
 iex> Process.info(self(), :messages)
