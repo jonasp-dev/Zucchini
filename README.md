@@ -2,7 +2,7 @@
 A job queue/worker pool written in Elixir 
 
 ```elixir
-1. Define a module with a function (ExampleWorker is already defined in the project)
+Define a module with a function (ExampleWorker is already defined in the project)
 defmodule Zucchini.ExampleWorker do
 
     def add(a, b) do
@@ -24,7 +24,7 @@ defmodule Zucchini.ExampleWorker do
     end
 end
 
-2. Start queue -> create a job -> push job onto queue
+Start queue -> create a job -> push job onto queue
 Zucchini.start(:queue_name)
 Zucchini.create_job(Zucchini.ExampleWorker, :add, [2, 3])
 |> Zucchini.async(:queue_name, [{:reply, true}])
@@ -33,5 +33,5 @@ Zucchini.create_job(Zucchini.ExampleWorker, :add, [2, 3])
 iex> Process.info(self(), :messages)
 
 #using erlang observer we can take a look at our supervision tree
-
+iex> :observer.start
 ```
